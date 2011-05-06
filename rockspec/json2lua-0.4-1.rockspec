@@ -1,8 +1,8 @@
 package = "json2lua"
-version = "0.3.2-2"
+version = "0.4-1"
 source = {
    url = "git://github.com/logiceditor-com/json2lua.git",
-   branch = "v0.3.2"
+   branch = "v0.4"
 }
 description = {
    summary = "A command-line tool to convert JSON to Lua",
@@ -11,7 +11,6 @@ description = {
 }
 dependencies = {
    "lua >= 5.1",
-   "luajson >= 1.2",
    "lua-nucleo >= 0.0.2"
 }
 build = {
