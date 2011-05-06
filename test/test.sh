@@ -8,6 +8,8 @@ ROOT=$(cd `dirname "${ROOT}"` && pwd)
 
 pushd "${ROOT}" >/dev/null
 
+../make.sh
+
 echo "--> running ad-hoc tests"
 
 for f in data/*.json; do
