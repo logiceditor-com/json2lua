@@ -137,6 +137,26 @@ do
 
   if FORCE_NUM_KEYS then
 
+    local postprocess
+    do
+      postprocess = function(data)
+        if data == yajl.null then
+          return nil
+        end
+
+        if type(data) ~= 'table' then
+          return data
+        end
+
+        local result = {}
+        for k,v in pairs(data) do
+          result[k] = postprocess(v)
+        end
+
+        return result
+      end
+    end
+
     decode_json = function(string)
         local result
         local stack = {
@@ -175,7 +195,8 @@ do
         }
 
         yajl.parser({ events = events })(string)
-        return result
+
+        return postprocess(result)
     end
 
   end
