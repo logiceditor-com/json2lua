@@ -2,6 +2,9 @@
 
 VERSION="v0.3.2"
 
+# TODO: Fix after lua-yajl will become a rock
+LUA_YAJL_BUILD_DIR="/usr/local/share/lua/cmod/"
+
 # Detect Lua interpreter (prefer LuaJIT 2)
 if [ ! -z "${LUA}" ]; then
   if [ -z "$(which ${LUA})" ]; then
@@ -114,31 +117,30 @@ local PREFIX_WITH_RETURN = ${PREFIX_WITH_RETURN}
 
 pcall(require, 'luarocks.require') -- Ignoring errors
 
-local json_decode, json_util, json_decode_util
+local decode_json
 do
-  local json, err = pcall(require, 'json')
-  if not json then
+  package.cpath = '${LUA_YAJL_BUILD_DIR}' .. '?.so;' .. package.cpath
+
+  local yajl_found, yajl = pcall(require, 'yajl')
+  if not yajl_found then
+    local err = yajl
     io.stdout:write(
         'error: ',
         err, '\n\n',
-        'try running \'luarocks install luajson\'', '\n'
+        'try running \'sudo apt-get install yajl\'', '\n'
       )
     io.stdout:flush()
     os.exit(1)
   end
 
-  json_util = require('json.util')
-  json_decode = require('json.decode')
-  json_decode_util = require('json.decode.util')
+  decode_json = yajl.to_value
 
   if
-    FORCE_NUM_KEYS and
-    not json_decode_util.setObjectKeyForceNumber
+    FORCE_NUM_KEYS
   then
     -- TODO: Traverse table manually in this case.
     error(
-        'can\'t force numeric keys:\ninstalled luajson version'
-     .. ' does not support setObjectKey option'
+        'can\'t force numeric keys:\ninstalled yajl version does not support them'
       )
   end
 end
@@ -166,24 +168,9 @@ end
 
 local input = assert(io.stdin:read('*a'))
 
--- Using simple decoding since we need nulls to be translated to nils.
-local decode_options = json_decode.simple
-
-if FORCE_NUM_KEYS then
-  decode_options = json_util.merge(
-      {
-        object =
-        {
-          setObjectKey = json_decode_util.setObjectKeyForceNumber;
-        };
-      },
-      decode_options
-    )
-end
-
-local data, err = json_decode(input, decode_options)
+local data, err = decode_json(input)
 if err then
-  error('luajson error: ' .. err)
+  error('lua-yajl error: ' .. err)
 end
 
 if PREFIX_WITH_RETURN then
