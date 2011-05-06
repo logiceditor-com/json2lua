@@ -135,13 +135,49 @@ do
 
   decode_json = yajl.to_value
 
-  if
-    FORCE_NUM_KEYS
-  then
-    -- TODO: Traverse table manually in this case.
-    error(
-        'can\'t force numeric keys:\ninstalled yajl version does not support them'
-      )
+  if FORCE_NUM_KEYS then
+
+    decode_json = function(string)
+        local result
+        local stack = {
+            function(val) result = val end
+        }
+        local obj_key
+        local events = {
+            value = function(_, val)
+                stack[#stack](val)
+            end,
+            open_array = function()
+                local arr = {}
+                stack[#stack](arr)
+                table.insert(stack, function(val)
+                    table.insert(result, val)
+                end)
+            end,
+            open_object = function()
+                local obj = {}
+                stack[#stack](obj)
+                table.insert(stack, function(val)
+                    obj[obj_key] = val
+                end)
+            end,
+            object_key = function(_, val)
+                local val_as_number = tonumber(val)
+                if val_as_number then
+                  obj_key = val_as_number
+                else
+                  obj_key = val
+                end
+            end,
+            close = function()
+                stack[#stack] = nil
+            end,
+        }
+
+        yajl.parser({ events = events })(string)
+        return result
+    end
+
   end
 end
 
