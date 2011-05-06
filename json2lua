@@ -119,6 +119,7 @@ do
   local json, err = pcall(require, 'json')
   if not json then
     io.stdout:write(
+        'error: ',
         err, '\n\n',
         'try running \'luarocks install luajson\'', '\n'
       )
@@ -148,6 +149,7 @@ do -- Bootstrap lua-nucleo
   local res, err = pcall(require, 'lua-nucleo.module')
   if not res then
     io.stdout:write(
+        'error: ',
         err,
         '\n\n',
         'try running \'luarocks install lua-nucleo\'',
