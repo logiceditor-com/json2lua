@@ -15,7 +15,7 @@ for f in data/*.json; do
   f=${f%.json}
   f=${f#json/}
 
-  ERROR_MSG=`../json2lua -rN <${f}.json 2>&1 | grep "stack traceback:" -B1 -A100`
+  ERROR_MSG=`../json2lua -rN <${f}.json 2>&1 | egrep 'stack traceback:|error:' -B1 -A100`
 
   if [[ $ERROR_MSG ]]; then
     echo "${f}.json: failed:"
