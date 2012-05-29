@@ -1,6 +1,6 @@
 #! /bin/bash
 
-VERSION="v0.3.2"
+VERSION="v0.4"
 
 # TODO: Fix after lua-yajl will become a rock
 LUA_YAJL_BUILD_DIR="/usr/local/share/lua/cmod/"
